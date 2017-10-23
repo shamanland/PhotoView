@@ -200,6 +200,10 @@ public class PhotoView extends ImageView {
         attacher.setAllowParentInterceptOnEdge(allow);
     }
 
+    public void setUseMediumScale(boolean useMediumScale) {
+        attacher.setUseMediumScale(useMediumScale);
+    }
+
     public void setMinimumScale(float minimumScale) {
         attacher.setMinimumScale(minimumScale);
     }

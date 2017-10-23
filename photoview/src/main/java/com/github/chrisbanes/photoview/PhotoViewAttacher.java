@@ -57,6 +57,8 @@ public class PhotoViewAttacher implements View.OnTouchListener,
     private float mMidScale = DEFAULT_MID_SCALE;
     private float mMaxScale = DEFAULT_MAX_SCALE;
 
+    private boolean mUseMediumScale = true;
+
     private boolean mAllowParentInterceptOnEdge = true;
     private boolean mBlockParentIntercept = false;
 
@@ -236,12 +238,20 @@ public class PhotoViewAttacher implements View.OnTouchListener,
                     float x = ev.getX();
                     float y = ev.getY();
 
-                    if (scale < getMediumScale()) {
-                        setScale(getMediumScale(), x, y, true);
-                    } else if (scale >= getMediumScale() && scale < getMaximumScale()) {
-                        setScale(getMaximumScale(), x, y, true);
+                    if (useMidScale()) {
+                        if (scale < getMediumScale()) {
+                            setScale(getMediumScale(), x, y, true);
+                        } else if (scale >= getMediumScale() && scale < getMaximumScale()) {
+                            setScale(getMaximumScale(), x, y, true);
+                        } else {
+                            setScale(getMinimumScale(), x, y, true);
+                        }
                     } else {
-                        setScale(getMinimumScale(), x, y, true);
+                        if (scale < getMaximumScale()) {
+                            setScale(getMaximumScale(), x, y, true);
+                        } else {
+                            setScale(getMinimumScale(), x, y, true);
+                        }
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
                     // Can sometimes happen when getX() and getY() is called
@@ -322,6 +332,10 @@ public class PhotoViewAttacher implements View.OnTouchListener,
 
     public float getMaximumScale() {
         return mMaxScale;
+    }
+
+    public boolean useMidScale() {
+        return mUseMediumScale;
     }
 
     public float getScale() {
@@ -428,6 +442,10 @@ public class PhotoViewAttacher implements View.OnTouchListener,
         mMinScale = minimumScale;
         mMidScale = mediumScale;
         mMaxScale = maximumScale;
+    }
+
+    public void setUseMediumScale(boolean useMediumScale) {
+        mUseMediumScale = useMediumScale;
     }
 
     public void setOnLongClickListener(OnLongClickListener listener) {
