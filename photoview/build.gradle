@@ -13,7 +13,7 @@ android {
 }
 
 dependencies {
-    compile "com.android.support:support-core-utils:$supportLibVersion"
+    api "com.android.support:support-core-utils:$supportLibVersion"
 }
 
 if (!rootProject.hasProperty("MAVEN_PLUGIN_DISABLED")) {
