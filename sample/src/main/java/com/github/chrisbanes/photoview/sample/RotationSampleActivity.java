@@ -18,7 +18,7 @@ package com.github.chrisbanes.photoview.sample;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.github.chrisbanes.photoview.PhotoView;

@@ -11,10 +11,6 @@ android {
     }
 }
 
-dependencies {
-    api "com.android.support:support-core-utils:28.0.0"
-}
-
 if (!rootProject.hasProperty("MAVEN_PLUGIN_DISABLED")) {
     apply from: 'https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.0.0/gradle-android-javadocs.gradle'
 }

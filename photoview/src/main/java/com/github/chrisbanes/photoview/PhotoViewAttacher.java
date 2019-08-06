@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright 2011, 2012 Chris Banes.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ */
 package com.github.chrisbanes.photoview;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Matrix.ScaleToFit;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.support.v4.view.MotionEventCompat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,60 +40,60 @@ import android.widget.OverScroller;
 public class PhotoViewAttacher implements View.OnTouchListener,
         View.OnLayoutChangeListener {
 
-    private static float DEFAULT_MAX_SCALE = 3.0f;
-    private static float DEFAULT_MID_SCALE = 1.75f;
-    private static float DEFAULT_MIN_SCALE = 1.0f;
-    private static int DEFAULT_ZOOM_DURATION = 200;
+    protected static float DEFAULT_MAX_SCALE = 3.0f;
+    protected static float DEFAULT_MID_SCALE = 1.75f;
+    protected static float DEFAULT_MIN_SCALE = 1.0f;
+    protected static int DEFAULT_ZOOM_DURATION = 200;
 
-    private static final int EDGE_NONE = -1;
-    private static final int EDGE_LEFT = 0;
-    private static final int EDGE_RIGHT = 1;
-    private static final int EDGE_BOTH = 2;
-    private static int SINGLE_TOUCH = 1;
+    protected static final int EDGE_NONE = -1;
+    protected static final int EDGE_LEFT = 0;
+    protected static final int EDGE_RIGHT = 1;
+    protected static final int EDGE_BOTH = 2;
+    protected static int SINGLE_TOUCH = 1;
 
-    private Interpolator mInterpolator = new AccelerateDecelerateInterpolator();
-    private int mZoomDuration = DEFAULT_ZOOM_DURATION;
-    private float mMinScale = DEFAULT_MIN_SCALE;
-    private float mMidScale = DEFAULT_MID_SCALE;
-    private float mMaxScale = DEFAULT_MAX_SCALE;
+    protected Interpolator mInterpolator = new AccelerateDecelerateInterpolator();
+    protected int mZoomDuration = DEFAULT_ZOOM_DURATION;
+    protected float mMinScale = DEFAULT_MIN_SCALE;
+    protected float mMidScale = DEFAULT_MID_SCALE;
+    protected float mMaxScale = DEFAULT_MAX_SCALE;
 
-    private boolean mUseMediumScale = true;
+    protected boolean mUseMediumScale = true;
 
-    private boolean mAllowParentInterceptOnEdge = true;
-    private boolean mBlockParentIntercept = false;
+    protected boolean mAllowParentInterceptOnEdge = true;
+    protected boolean mBlockParentIntercept = false;
 
-    private ImageView mImageView;
+    protected ImageView mImageView;
 
     // Gesture Detectors
-    private GestureDetector mGestureDetector;
-    private CustomGestureDetector mScaleDragDetector;
+    protected GestureDetector mGestureDetector;
+    protected CustomGestureDetector mScaleDragDetector;
 
     // These are set so we don't keep allocating them on the heap
-    private final Matrix mBaseMatrix = new Matrix();
-    private final Matrix mDrawMatrix = new Matrix();
-    private final Matrix mSuppMatrix = new Matrix();
-    private final RectF mDisplayRect = new RectF();
-    private final float[] mMatrixValues = new float[9];
+    protected final Matrix mBaseMatrix = new Matrix();
+    protected final Matrix mDrawMatrix = new Matrix();
+    protected final Matrix mSuppMatrix = new Matrix();
+    protected final RectF mDisplayRect = new RectF();
+    protected final float[] mMatrixValues = new float[9];
 
     // Listeners
-    private OnMatrixChangedListener mMatrixChangeListener;
-    private OnPhotoTapListener mPhotoTapListener;
-    private OnOutsidePhotoTapListener mOutsidePhotoTapListener;
-    private OnViewTapListener mViewTapListener;
-    private View.OnClickListener mOnClickListener;
-    private OnLongClickListener mLongClickListener;
-    private OnScaleChangedListener mScaleChangeListener;
-    private OnSingleFlingListener mSingleFlingListener;
-    private OnViewDragListener mOnViewDragListener;
+    protected OnMatrixChangedListener mMatrixChangeListener;
+    protected OnPhotoTapListener mPhotoTapListener;
+    protected OnOutsidePhotoTapListener mOutsidePhotoTapListener;
+    protected OnViewTapListener mViewTapListener;
+    protected View.OnClickListener mOnClickListener;
+    protected OnLongClickListener mLongClickListener;
+    protected OnScaleChangedListener mScaleChangeListener;
+    protected OnSingleFlingListener mSingleFlingListener;
+    protected OnViewDragListener mOnViewDragListener;
 
-    private FlingRunnable mCurrentFlingRunnable;
-    private int mScrollEdge = EDGE_BOTH;
-    private float mBaseRotation;
+    protected FlingRunnable mCurrentFlingRunnable;
+    protected int mScrollEdge = EDGE_BOTH;
+    protected float mBaseRotation;
 
-    private boolean mZoomEnabled = true;
-    private ScaleType mScaleType = ScaleType.FIT_CENTER;
+    protected boolean mZoomEnabled = true;
+    protected ScaleType mScaleType = ScaleType.FIT_CENTER;
 
-    private OnGestureListener onGestureListener = new OnGestureListener() {
+    protected OnGestureListener onGestureListener = new OnGestureListener() {
         @Override
         public void onDrag(float dx, float dy) {
             if (mScaleDragDetector.isScaling()) {
@@ -106,15 +106,15 @@ public class PhotoViewAttacher implements View.OnTouchListener,
             mSuppMatrix.postTranslate(dx, dy);
             checkAndDisplayMatrix();
 
-        /*
-         * Here we decide whether to let the ImageView's parent to start taking
-         * over the touch event.
-         *
-         * First we check whether this function is enabled. We never want the
-         * parent to take over if we're scaling. We then check the edge we're
-         * on, and the direction of the scroll (i.e. if we're pulling against
-         * the edge, aka 'overscrolling', let the parent take over).
-         */
+            /*
+             * Here we decide whether to let the ImageView's parent to start taking
+             * over the touch event.
+             *
+             * First we check whether this function is enabled. We never want the
+             * parent to take over if we're scaling. We then check the edge we're
+             * on, and the direction of the scroll (i.e. if we're pulling against
+             * the edge, aka 'overscrolling', let the parent take over).
+             */
             ViewParent parent = mImageView.getParent();
             if (mAllowParentInterceptOnEdge && !mScaleDragDetector.isScaling() && !mBlockParentIntercept) {
                 if (mScrollEdge == EDGE_BOTH
@@ -134,8 +134,7 @@ public class PhotoViewAttacher implements View.OnTouchListener,
         @Override
         public void onFling(float startX, float startY, float velocityX, float velocityY) {
             mCurrentFlingRunnable = new FlingRunnable(mImageView.getContext());
-            mCurrentFlingRunnable.fling(getImageViewWidth(mImageView),
-                    getImageViewHeight(mImageView), (int) velocityX, (int) velocityY);
+            mCurrentFlingRunnable.fling(getImageViewWidth(mImageView), getImageViewHeight(mImageView), (int) velocityX, (int) velocityY);
             mImageView.post(mCurrentFlingRunnable);
         }
 
@@ -151,6 +150,7 @@ public class PhotoViewAttacher implements View.OnTouchListener,
         }
     };
 
+    @SuppressLint("ClickableViewAccessibility")
     public PhotoViewAttacher(ImageView imageView) {
         mImageView = imageView;
         imageView.setOnTouchListener(this);
@@ -183,8 +183,7 @@ public class PhotoViewAttacher implements View.OnTouchListener,
                         return false;
                     }
 
-                    if (MotionEventCompat.getPointerCount(e1) > SINGLE_TOUCH
-                            || MotionEventCompat.getPointerCount(e2) > SINGLE_TOUCH) {
+                    if (e1.getPointerCount() > SINGLE_TOUCH || e2.getPointerCount() > SINGLE_TOUCH) {
                         return false;
                     }
 
@@ -305,6 +304,7 @@ public class PhotoViewAttacher implements View.OnTouchListener,
         return true;
     }
 
+    @SuppressWarnings("unused")
     public void setBaseRotation(final float degrees) {
         mBaseRotation = degrees % 360;
         update();
@@ -355,6 +355,7 @@ public class PhotoViewAttacher implements View.OnTouchListener,
     }
 
     @Override
+    @SuppressLint("ClickableViewAccessibility")
     public boolean onTouch(View v, MotionEvent ev) {
         boolean handled = false;
 
@@ -508,6 +509,7 @@ public class PhotoViewAttacher implements View.OnTouchListener,
      *
      * @param interpolator the zoom interpolator
      */
+    @SuppressWarnings("unused")
     public void setZoomInterpolator(Interpolator interpolator) {
         mInterpolator = interpolator;
     }
@@ -605,7 +607,7 @@ public class PhotoViewAttacher implements View.OnTouchListener,
     /**
      * Helper method that simply checks the Matrix, and then displays the result
      */
-    private void checkAndDisplayMatrix() {
+    protected void checkAndDisplayMatrix() {
         if (checkMatrixBounds()) {
             setImageViewMatrix(getDrawMatrix());
         }
@@ -755,11 +757,11 @@ public class PhotoViewAttacher implements View.OnTouchListener,
         return true;
     }
 
-    private int getImageViewWidth(ImageView imageView) {
+    protected int getImageViewWidth(ImageView imageView) {
         return imageView.getWidth() - imageView.getPaddingLeft() - imageView.getPaddingRight();
     }
 
-    private int getImageViewHeight(ImageView imageView) {
+    protected int getImageViewHeight(ImageView imageView) {
         return imageView.getHeight() - imageView.getPaddingTop() - imageView.getPaddingBottom();
     }
 
